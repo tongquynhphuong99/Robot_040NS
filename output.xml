@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.2.2 (Python 3.9.21 on linux)" generated="2025-03-31T23:05:55.133778" rpa="false" schemaversion="5">
+<suite id="s1" name="Login" source="/home/demopq/Desktop/Robot_040_NS/Bases/Login/login.robot">
+<test id="s1-t1" name="Login" line="13">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2025-03-31T23:05:55.214212" level="INFO">Opening browser 'chrome' to base url 'https://192.168.10.1/'.</msg>
+<arg>${url}</arg>
+<arg>${browser}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2025-03-31T23:05:55.213506" elapsed="1.339966"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2025-03-31T23:05:56.554382" elapsed="0.025012"/>
+</kw>
+<kw name="loginWebgui">
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2025-03-31T23:05:56.582858" level="INFO">Clicking button 'id:details-button'.</msg>
+<arg>id:details-button</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2025-03-31T23:05:56.581843" elapsed="0.098765"/>
+</kw>
+<kw name="Click Link" owner="SeleniumLibrary">
+<msg time="2025-03-31T23:05:56.681264" level="INFO">Clicking link 'id:proceed-link'.</msg>
+<arg>id:proceed-link</arg>
+<doc>Clicks a link identified by ``locator``.</doc>
+<status status="PASS" start="2025-03-31T23:05:56.680953" elapsed="0.258668"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-03-31T23:05:56.940939" level="INFO">Typing text 'admin' into text field 'id:username'.</msg>
+<arg>id:username</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-03-31T23:05:56.940185" elapsed="0.056597"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2025-03-31T23:05:56.997614" level="INFO">Typing text 'ttcn@99CN' into text field 'password'.</msg>
+<arg>password</arg>
+<arg>${password}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2025-03-31T23:05:56.997146" elapsed="0.054866"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2025-03-31T23:05:57.052625" level="INFO">Clicking button 'loginbutton'.</msg>
+<arg>loginbutton</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2025-03-31T23:05:57.052333" elapsed="0.053485"/>
+</kw>
+<status status="PASS" start="2025-03-31T23:05:56.580467" elapsed="0.525692"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2025-03-31T23:05:57.106547" elapsed="0.056309"/>
+</kw>
+<status status="PASS" start="2025-03-31T23:05:55.212779" elapsed="1.950555"/>
+</test>
+<status status="PASS" start="2025-03-31T23:05:55.135570" elapsed="2.028464"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Login" id="s1" pass="1" fail="0" skip="0">Login</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
