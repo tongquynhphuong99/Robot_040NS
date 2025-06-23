@@ -14,6 +14,7 @@ Login
     Open Browser    ${url}    ${browser}
     Maximize Browser Window
     loginWebgui
+    logoutwebgui
     Close Browser
     
 *** Keywords ***
@@ -23,3 +24,10 @@ loginWebgui
     Input Text    id:username    ${username}
     Input Text    id:password    ${password}
     Click Button    id:loginbutton
+
+logoutwebgui
+    Sleep    3
+    Select Frame    header
+    Click Element    xpath://*[@id="logOut"]/font
+    Unselect Frame    
+
