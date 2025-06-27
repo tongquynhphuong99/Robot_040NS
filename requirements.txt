@@ -1,4 +1,5 @@
 robotframework
-SeleniumLibrary
+robotframework-seleniumlibrary
+selenium
 python3
 
