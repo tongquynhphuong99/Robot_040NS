@@ -18,6 +18,7 @@ Login
     Call Method    ${options}    add_argument    --disable-dev-shm-usage
     Call Method    ${options}    add_argument    --disable-gpu
     Call Method    ${options}    add_argument    --user-data-dir=${USER_DATA_DIR}
+    Call Method    ${options}    add_argument    --headless
     Open Browser    ${url}    ${browser}    options=${options}
     Maximize Browser Window
     loginWebgui
