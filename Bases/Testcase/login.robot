@@ -7,7 +7,7 @@ ${browser}    chrome
 ${url}    https://192.168.10.1/
 ${username}    admin
 ${password}    ttcn@99CN
-${CHROME_OPTS}    --no-sandbox --disable-dev-shm-usage --disable-gpu --user-data-dir=/tmp/chrome-${RANDOM}
+${CHROME_OPTS}     --no-sandbox --disable-dev-shm-usage --disable-gpu
 *** Test Cases ***
 
 Login
