@@ -11,13 +11,7 @@ ${password}    ttcn@99CN
 *** Test Cases ***
 
 Login
-    ${timestamp}=    Evaluate    __import__('time').time()
-    ${profile_dir}=  Set Variable    /tmp/chrome-profile-${timestamp}
     Open Browser    ${url}    ${browser}
-    ...    options=add_argument(--no-sandbox)
-    ...    options=add_argument(--disable-dev-shm-usage)
-    ...    options=add_argument(--user-data-dir=${profile_dir})
-    ...    options=add_argument(--headless)
     Maximize Browser Window
     loginWebgui
     logoutwebgui
