@@ -17,6 +17,9 @@ pipeline {
                 )
             }
         }
+    environment {
+    RANDOM_ID = "${new Random().nextInt(100000)}"
+    }
     stage('Install Chrome + Chromedriver') {
     steps {
         sh '''
