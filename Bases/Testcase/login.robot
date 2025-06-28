@@ -11,7 +11,7 @@ ${password}    ttcn@99CN
 *** Test Cases ***
 
 Login
-    Open Browser    ${url}    ${browser}     options=add_argument(--no-sandbox)    executable_path=${CHROMEDRIVER}
+    Open Browser    ${url}    ${browser}  
     Maximize Browser Window
     loginWebgui
     logoutwebgui
