@@ -7,11 +7,10 @@ ${browser}    chrome
 ${url}    https://192.168.10.1/
 ${username}    admin
 ${password}    ttcn@99CN
-${chrome_options}    add_argument(--no-sandbox); add_argument(--disable-dev-shm-usage); add_argument(--disable-gpu); add_argument(--user-data-dir=/tmp/chrome-profile-${RANDOM})
 *** Test Cases ***
 
 Login
-    Open Browser    ${url}    ${browser}    options=${chrome_options}
+    Open Browser    ${url}    ${browser}
     Maximize Browser Window
     loginWebgui
     logoutwebgui
