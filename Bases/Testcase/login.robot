@@ -12,6 +12,10 @@ ${password}    ttcn@99CN
 
 Login
     Open Browser    ${url}    ${browser}
+    ...    options=add_argument(--no-sandbox)
+    ...    options=add_argument(--disable-dev-shm-usage)
+    ...    options=add_argument(--user-data-dir=/tmp/chrome-profile-${RANDOM})
+    ...    options=add_argument(--headless)  # Bỏ dòng này nếu bạn muốn thấy trình duyệt
     Maximize Browser Window
     loginWebgui
     logoutwebgui
