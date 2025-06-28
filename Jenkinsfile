@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.10'  // Có sẵn pip
+            // image 'python:3.10'  // Có sẵn pip
             image 'ppodgorsek/robot-framework:latest'
             args '-u root'       // Tránh lỗi khi pip install
         }
