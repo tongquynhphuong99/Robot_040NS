@@ -18,11 +18,11 @@ pipeline {
             }
         }
 
-        stage('Install dependencies') {
-            steps {
-                sh 'pip install -r requirements.txt'
-            }
-        }
+        // stage('Install dependencies') {
+        //     steps {
+        //         sh 'pip install -r requirements.txt'
+        //     }
+        // }
 
         stage('Run Robot Tests') {
             steps {
