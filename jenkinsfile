@@ -1,0 +1,36 @@
+pipeline {
+    agent {
+        docker {
+            image 'python:3.10' // Docker image có sẵn pip + robot
+        }
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/tongquynhphuong99/Robot_040NS.git'
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Run Robot Tests') {
+            steps {
+                sh '''
+                    mkdir -p results
+                    robot --outputdir results Bases/Testcase/
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'results/*'
+        }
+    }
+}
