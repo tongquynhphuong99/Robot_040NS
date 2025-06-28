@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.10'
-            
+            // image 'python:3.10'
+            image 'ppodgorsek/robot-framework:latest'
             args '-u root'  // tránh lỗi permission khi apt install/pip install
         }
     }
@@ -17,9 +17,7 @@ pipeline {
                 )
             }
         }
-    environment {
-    RANDOM_ID = "${new Random().nextInt(100000)}"
-    }
+   
     stage('Install Chrome + Chromedriver') {
     steps {
         sh '''
