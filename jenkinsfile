@@ -8,7 +8,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/tongquynhphuong99/Robot_040NS.git'
+                git credentialsId: 'github-token',
+                    url: 'https://github.com/your-username/your-private-repo.git',
+                    branch: 'main'
             }
         }
 
