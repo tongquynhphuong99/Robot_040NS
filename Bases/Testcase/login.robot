@@ -12,12 +12,12 @@ ${USER_DATA_DIR}    /tmp/robot-profile-${RUNID}
 
 Login
     ${options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
-    ${RANDOM}=     Evaluate    __import__('uuid').uuid4().hex
-    ${USER_DATA_DIR}=    Set Variable    /tmp/robot-profile-${RANDOM}
+    ${random}=     Evaluate    __import__('uuid').uuid4().hex
+    ${user_data_dir}=    Set Variable    /tmp/chrome-profile-${random}
     Call Method    ${options}    add_argument    --no-sandbox
     Call Method    ${options}    add_argument    --disable-dev-shm-usage
     Call Method    ${options}    add_argument    --disable-gpu
-    Call Method    ${options}    add_argument    --user-data-dir=${USER_DATA_DIR}
+    Call Method    ${options}    add_argument    --user-data-dir=${user_data_dir}
     Call Method    ${options}    add_argument    --headless
     Open Browser    ${url}    ${browser}    options=${options}
     Maximize Browser Window
