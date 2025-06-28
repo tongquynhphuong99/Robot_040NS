@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.10'  // Có sẵn pip
-            // image 'ppodgorsek/robot-framework:latest'
+            // image 'python:3.10'  // Có sẵn pip
+            image 'ppodgorsek/robot-framework:latest'
             args '-u root'       // Tránh lỗi khi pip install
         }
     }
@@ -18,11 +18,11 @@ pipeline {
             }
         }
        
-        stage('Install dependencies') {
-            steps {
-                sh 'pip install -r requirements.txt'
-            }
-        }
+        // stage('Install dependencies') {
+        //     steps {
+        //         sh 'pip install -r requirements.txt'
+        //     }
+        // }
 
         stage('Run Robot Tests') {
             steps {
