@@ -1,28 +1,25 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.10'       // Docker image có sẵn python + pip
-            args '-u root'            // Để cài thêm gói mà không bị lỗi permission
+            image 'python:3.10'  // Có sẵn pip
+            args '-u root'       // Tránh lỗi khi pip install
         }
     }
 
     stages {
-        stage('Install Robot Framework') {
-            steps {
-                sh '''
-                    pip install --upgrade pip
-                    pip install robotframework
-                '''
-            }
-        }
-
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 git(
-                    credentialsId: 'github-token',    // Token GitHub bạn đã cấu hình
+                    credentialsId: 'github-token', // Token GitHub
                     url: 'https://github.com/tongquynhphuong99/Robot_040NS.git',
                     branch: 'main'
                 )
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
             }
         }
 
