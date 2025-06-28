@@ -11,7 +11,10 @@ ${password}    ttcn@99CN
 *** Test Cases ***
 
 Login
-    Open Browser    ${url}    ${browser}     options=add_argument(--no-sandbox),add_argument(--disable-dev-shm-usage),add_argument(--disable-gpu) 
+    Open Browser    ${url}    ${browser}
+    ...    options=add_argument(--no-sandbox)
+    ...    options=add_argument(--disable-dev-shm-usage)
+    ...    options=add_argument(--disable-gpu)
     Maximize Browser Window
     loginWebgui
     logoutwebgui
