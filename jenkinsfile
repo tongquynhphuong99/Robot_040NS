@@ -2,21 +2,24 @@ pipeline {
     agent {
         docker {
             image 'python:3.10' // Docker image có sẵn pip + robot
+            args '-u root' // Cho phép chạy pip install mà không lỗi permission
         }
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'github-token',
-                    url: 'https://github.com/your-username/your-private-repo.git',
+                git(
+                    credentialsId: 'github-token', // đảm bảo bạn đã tạo credentials này trong Jenkins
+                    url: 'https://github.com/tongquynhphuong99/Robot_040NS.git',
                     branch: 'main'
+                )
             }
         }
 
         stage('Install dependencies') {
             steps {
-                sh 'pip install -r requirements.txt'
+                sh 'pip install --upgrade pip && pip install -r requirements.txt'
             }
         }
 
