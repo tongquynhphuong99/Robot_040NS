@@ -17,7 +17,19 @@ pipeline {
                 )
             }
         }
+    stage('Install Chrome + Chromedriver') {
+    steps {
+        sh '''
+            apt-get update
+            apt-get install -y curl wget unzip gnupg software-properties-common
 
+            # Chrome
+            apt-get update && apt-get install -y \
+            chromium chromium-driver \
+            && rm -rf /var/lib/apt/lists/*
+        '''
+    }
+}
         
 
         stage('Install Python dependencies') {
