@@ -11,10 +11,8 @@ ${password}    ttcn@99CN
 *** Test Cases ***
 
 Login
-    Open Browser    ${url}    ${browser}
-    ...    options=add_argument(--no-sandbox)
-    ...    options=add_argument(--disable-dev-shm-usage)
-    ...    options=add_argument(--disable-gpu)
+    ${options}=    Evaluate    ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"]    modules=sys
+    Open Browser    ${url}    ${browser}    options=${options}
     Maximize Browser Window
     loginWebgui
     logoutwebgui
