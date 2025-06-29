@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             // image 'python:3.10'
-            image 'ppodgorsek/robot-framework:latest'
+            image 'demopq/robot-python-sele-chor:phuongttq'
             args '-u root'  // tránh lỗi permission khi apt install/pip install
         }
     }
