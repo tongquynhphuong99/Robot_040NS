@@ -9,8 +9,10 @@ pipeline {
     stages {
         stage('Run Robot Tests') {
             steps {
-                sh 'robot --exitonfailure --outputdir results Bases/Testcase/login.robot
-'
+                sh '''
+                    mkdir -p results
+                    robot --outputdir results Bases/Testcase/login.robot
+                '''
             }
         }
     }
@@ -22,4 +24,3 @@ pipeline {
         }
     }
 }
-
