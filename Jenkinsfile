@@ -20,10 +20,8 @@ pipeline {
 
         stage('Run Robot Tests') {
             steps {
-                sh '''
-                    mkdir -p results
-                    robot --outputdir results Bases/Testcase/
-                '''
+                sh 'robot Bases/Testcase/login.robot'
+               
             }
         }
     }
