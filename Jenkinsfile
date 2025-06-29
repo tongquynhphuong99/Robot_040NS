@@ -7,40 +7,16 @@ pipeline {
         }
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git(
-                    credentialsId: 'github-token',
-                    url: 'https://github.com/tongquynhphuong99/Robot_040NS.git',
-                    branch: 'main'
-                )
-            }
-        }
-   
-    // stage('Install Chrome + Chromedriver') {
-    // steps {
-    //     sh '''
-    //         apt-get update
-    //         apt-get install -y curl wget unzip gnupg software-properties-common
-
-    //         # Chrome
-    //         apt-get update && apt-get install -y \
-    //         chromium chromium-driver \
-    //         && rm -rf /var/lib/apt/lists/*
-    //     '''
+    // stages {
+    //     stage('Checkout') {
+    //         steps {
+    //             git(
+    //                 credentialsId: 'github-token',
+    //                 url: 'https://github.com/tongquynhphuong99/Robot_040NS.git',
+    //                 branch: 'main'
+    //             )
+    //         }
     //     }
-    // }
-        
-
-        // stage('Install Python dependencies') {
-        //     steps {
-        //         sh '''
-        //             pip install --upgrade pip
-        //             pip install -r requirements.txt
-        //         '''
-        //     }
-        // }
 
         stage('Run Robot Tests') {
             steps {
