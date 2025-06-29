@@ -9,14 +9,15 @@ pipeline {
     stages {
         stage('Run Robot Tests') {
             steps {
-                sh 'robot Bases/Testcase/login.robot'
+                sh 'robot --exitonfailure --outputdir results Bases/Testcase/login.robot
+'
             }
         }
     }
 
     post {
         always {
-            // archiveArtifacts artifacts: 'results/*'
+            archiveArtifacts artifacts: 'results/*'
             robot outputPath: 'results'
         }
     }
