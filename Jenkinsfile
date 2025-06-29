@@ -16,19 +16,19 @@ pipeline {
     //                 branch: 'main'
     //             )
     //         }
+    // //     }
+    // stage('Checkout') {
+    //         steps {
+    //             checkout scm
+    //         }
     //     }
-    stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        stage('Run Robot Tests') {
-            steps {
-                sh 'robot Bases/Testcase/login.robot'
+    stage('Run Robot Tests') {
+        steps {
+            sh 'robot Bases/Testcase/login.robot'
                
             }
         }
-    }
+    
 
     post {
         always {
