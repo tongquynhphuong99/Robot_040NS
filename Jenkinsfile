@@ -7,16 +7,16 @@ pipeline {
         }
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git(
-                    credentialsId: 'github-token',
-                    url: 'https://github.com/tongquynhphuong99/Robot_040NS.git',
-                    branch: 'main'
-                )
-            }
-        }
+    // stages {
+    //     stage('Checkout') {
+    //         steps {
+    //             git(
+    //                 credentialsId: 'github-token',
+    //                 url: 'https://github.com/tongquynhphuong99/Robot_040NS.git',
+    //                 branch: 'main'
+    //             )
+    //         }
+    //     }
     stage('Checkout') {
             steps {
                 checkout scm
