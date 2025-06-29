@@ -11,7 +11,7 @@ ${password}    ttcn@99CN
 *** Test Cases ***
 
 Login
-    Open Browser    ${url}    ${browser}   
+    Open Browser    ${url}    headlesschrome   
     Maximize Browser Window
     loginWebgui
     logoutwebgui
