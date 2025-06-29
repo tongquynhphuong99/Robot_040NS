@@ -19,7 +19,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'results/*'
+            //archiveArtifacts artifacts: 'results/*'
             robot outputPath: 'results'
         }
     }
