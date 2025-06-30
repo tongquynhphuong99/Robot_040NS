@@ -7,7 +7,7 @@ pipeline {
     }
      triggers {
         githubPush()   // Kích hoạt khi có push từ GitHub
-        cron('H/5 * * *')  // Mỗi ngày lúc 2h sáng
+        cron('H/5 * * * *')  // Mỗi ngày lúc 2h sáng
     }
     stages {
         stage('Run Robot Tests') {
