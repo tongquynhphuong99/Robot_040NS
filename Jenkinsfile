@@ -26,9 +26,8 @@ pipeline {
             //archiveArtifacts artifacts: 'results/*'
             robot outputPath: 'results'
              sh '''
-            if [ -f results/report.html ]; then
-                curl -X POST -F "id_task=$TASK_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_report
-            fi
+            tar czf results.tar.gz -C results .
+            curl -X POST -F "id_task=$TASK_ID" -F "report=@results.tar.gz" http://<BACKEND_HOST>:8000/upload_report
             
             
                
