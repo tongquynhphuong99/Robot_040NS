@@ -5,7 +5,11 @@ pipeline {
             args '-u root'
         }
     }
-
+    parameters {
+        string(name: 'REPO_URL', defaultValue: '', description: 'Link repo')
+        string(name: 'TASK_ID', defaultValue: '', description: 'ID của task')
+        string(name: 'TESTSUITE', defaultValue: '', description: 'Tên testsuite')
+    }
     stages {
         stage('Run Robot Tests') {
             steps {
