@@ -25,6 +25,11 @@ pipeline {
         always {
             //archiveArtifacts artifacts: 'results/*'
             robot outputPath: 'results'
+             sh '''
+            if [ -f results/report.html ]; then
+                curl -X POST -F "id_task=$TASK_ID" -F "report=@results/report.html" http://localhost:8000/upload_report
+            fi
+        '''
         }
     }
 }
