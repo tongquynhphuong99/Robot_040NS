@@ -6,9 +6,9 @@ pipeline {
         }
     }
     parameters {
-        string(name: 'REPO_URL', defaultValue: '', description: 'Link repo')
+        
         string(name: 'TASK_ID', defaultValue: '', description: 'ID của task')
-        string(name: 'TESTSUITE', defaultValue: '', description: 'Tên testsuite')
+        string(name: 'ID_PJ', defaultValue: '', description: 'ID của Project')
     }
     stages {
         stage('Run Robot Tests') {
