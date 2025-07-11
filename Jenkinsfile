@@ -29,6 +29,16 @@ pipeline {
             if [ -f results/report.html ]; then
                 curl -X POST -F "id_task=$TASK_ID" -F "report=@results/report.html" http://192.168.1.31:8000/upload_report
             fi
+            
+            python3 -c "
+            import xml.etree.ElementTree as ET
+            tree = ET.parse('results/output.xml')
+            root = tree.getroot()
+            stats = root.find('statistics').find('total').findall('stat')
+            for s in stats:
+                print(f'{s.attrib[\"name\"]}: Pass={s.attrib[\"pass\"]}, Fail={s.attrib[\"fail\"]}')
+            " > results/summary.txt
+               
         '''
         }
     }
