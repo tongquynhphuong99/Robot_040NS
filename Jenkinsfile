@@ -26,9 +26,10 @@ pipeline {
             //archiveArtifacts artifacts: 'results/*'
             robot outputPath: 'results'
              sh '''
+             # Nén toàn bộ thư mục kết quả (results) bao gồm report.html, log.html, output.xml, ...
             tar czf results.tar.gz -C results .
-            curl -X POST -F "id_task=$TASK_ID" -F "report=@results.tar.gz" http://<BACKEND_HOST>:8000/upload_report
-            
+            # Gửi file nén về backend
+            curl -X POST -F "id_task=$TASK_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_report
             
                
         '''
