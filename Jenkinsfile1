@@ -13,9 +13,9 @@ pipeline {
         string(name: 'CRON_EXPRESSION', defaultValue: '', description: 'Cron expression for scheduling')
     }
     
-    triggers {
-        cron('0 8 * * *')  // Chạy hàng ngày lúc 8h sáng (có thể thay đổi)
-    }
+    //triggers {
+       // cron('0 8 * * *')  // Chạy hàng ngày lúc 8h sáng (có thể thay đổi)
+    //}
     
     stages {
         stage('Setup') {
