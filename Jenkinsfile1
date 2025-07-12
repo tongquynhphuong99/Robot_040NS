@@ -6,7 +6,7 @@ pipeline {
         }
     }
      triggers {
-        cron('H 12 * * *')
+        cron('H/5 * * * *')
        // githubPush()   // Kích hoạt khi có push từ GitHub
         
     }
