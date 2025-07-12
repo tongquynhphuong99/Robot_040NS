@@ -6,8 +6,8 @@ pipeline {
         }
     }
      triggers {
-        cron('H 12 * * *')
-        githubPush()   // Kích hoạt khi có push từ GitHub
+        cron('H/2 * * * *')
+       // githubPush()   // Kích hoạt khi có push từ GitHub
         
     }
     stages {
