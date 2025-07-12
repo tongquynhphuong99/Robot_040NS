@@ -5,26 +5,96 @@ pipeline {
             args '-u root'
         }
     }
-     triggers {
-        cron('H 12 * * * *')
-       // githubPush()   // Kích hoạt khi có push từ GitHub
-        
+    
+    // Thêm parameters để nhận từ TestOps
+    parameters {
+        string(name: 'TASK_ID', defaultValue: '', description: 'Task ID from TestOps')
+        string(name: 'ID_PJ', defaultValue: '', description: 'Project ID from TestOps') 
+        string(name: 'CRON_EXPRESSION', defaultValue: '', description: 'Cron expression for scheduling')
     }
+    
+    triggers {
+        cron('0 8 * * *')  // Chạy hàng ngày lúc 8h sáng (có thể thay đổi)
+    }
+    
     stages {
+        stage('Setup') {
+            steps {
+                echo "=== THÔNG TIN TASK TỪ TESTOPS ==="
+                echo "Task ID: ${params.TASK_ID}"
+                echo "Project ID: ${params.ID_PJ}"
+                echo "Cron Expression: ${params.CRON_EXPRESSION}"
+                echo "=================================="
+                
+                script {
+                    // Kiểm tra parameters có được truyền không
+                    if (params.TASK_ID && params.TASK_ID.trim() != '') {
+                        echo "✅ Task ID được truyền từ TestOps: ${params.TASK_ID}"
+                    } else {
+                        echo "⚠️ Task ID không được truyền, sử dụng giá trị mặc định"
+                    }
+                    
+                    if (params.ID_PJ && params.ID_PJ.trim() != '') {
+                        echo "✅ Project ID được truyền từ TestOps: ${params.ID_PJ}"
+                    } else {
+                        echo "⚠️ Project ID không được truyền, sử dụng giá trị mặc định"
+                    }
+                    
+                    if (params.CRON_EXPRESSION && params.CRON_EXPRESSION.trim() != '') {
+                        echo "✅ Cron Expression được truyền từ TestOps: ${params.CRON_EXPRESSION}"
+                        // Có thể sử dụng cron expression để logic khác
+                        def cronParts = params.CRON_EXPRESSION.split(' ')
+                        if (cronParts.length == 5) {
+                            echo "📅 Cron format hợp lệ: ${cronParts}"
+                        }
+                    } else {
+                        echo "⚠️ Cron Expression không được truyền, sử dụng trigger mặc định"
+                    }
+                }
+            }
+        }
+        
         stage('Run Robot Tests') {
             steps {
                 sh '''
+                    echo "Bắt đầu chạy Robot Framework tests..."
                     mkdir -p results
                     robot --outputdir results Bases/Testcase/login.robot
+                    echo "Hoàn thành chạy tests!"
                 '''
+            }
+        }
+        
+        stage('Process Results') {
+            steps {
+                script {
+                    // Xử lý kết quả test
+                    echo "📊 Xử lý kết quả test cho Task: ${params.TASK_ID}"
+                    echo "📁 Project: ${params.ID_PJ}"
+                    
+                    // Có thể thêm logic xử lý kết quả ở đây
+                    // Ví dụ: upload report về TestOps, gửi notification, etc.
+                }
             }
         }
     }
 
     post {
         always {
-            //archiveArtifacts artifacts: 'results/*'
             robot outputPath: 'results'
+            
+            script {
+                echo "🏁 Kết thúc job với Task ID: ${params.TASK_ID}"
+                echo "📈 Robot report đã được tạo trong thư mục results/"
+            }
+        }
+        
+        success {
+            echo "✅ Job chạy thành công!"
+        }
+        
+        failure {
+            echo "❌ Job chạy thất bại!"
         }
     }
-}
+} 
