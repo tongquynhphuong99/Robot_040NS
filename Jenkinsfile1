@@ -12,17 +12,17 @@ pipeline {
     }
     
     environment {
-        // Sử dụng SCHEDULE_ID từ parameters (giống tab Executions)
-        FINAL_SCHEDULE_ID = "${params.SCHEDULE_ID}"
+        // Sử dụng JOB_NAME làm SCHEDULE_ID (mỗi job = 1 schedule)
+        FINAL_SCHEDULE_ID = "${env.JOB_NAME}"
     }
     
     stages {
         stage('Get Schedule ID') {
             steps {
                 script {
-                    // Đọc SCHEDULE_ID từ parameters (giống tab Executions)
-                    def scheduleId = params.SCHEDULE_ID ?: ''
-                    echo "📖 Đọc SCHEDULE_ID từ parameters: ${scheduleId}"
+                    // Sử dụng JOB_NAME làm schedule ID
+                    def scheduleId = env.JOB_NAME ?: ''
+                    echo "📖 Sử dụng JOB_NAME làm SCHEDULE_ID: ${scheduleId}"
                     
                     // Lưu vào environment variable để sử dụng trong post actions
                     env.FINAL_SCHEDULE_ID = scheduleId
@@ -54,7 +54,7 @@ pipeline {
                 else
                     echo "❌ Không tìm thấy SCHEDULE_ID, không thể upload report"
                     echo "🔍 Debug info:"
-                    echo "   params.SCHEDULE_ID = '$params.SCHEDULE_ID'"
+                    echo "   JOB_NAME = '$JOB_NAME'"
                     echo "   FINAL_SCHEDULE_ID = '$FINAL_SCHEDULE_ID'"
                 fi
             '''
