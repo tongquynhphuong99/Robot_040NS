@@ -99,6 +99,8 @@ pipeline {
             script {
                 echo "🏁 Kết thúc job với Schedule ID: ${params.SCHEDULE_ID}"
                 echo "📈 Robot report đã được tạo trong thư mục results/"
+                echo "📁 Nội dung thư mục results:"
+                ls -lh results/
             }
         }
         
