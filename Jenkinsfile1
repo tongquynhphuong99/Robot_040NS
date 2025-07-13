@@ -12,30 +12,17 @@ pipeline {
     }
     
     environment {
-        // Sử dụng SCHEDULE_ID từ environment (được set trong job config) hoặc từ parameters
-        FINAL_SCHEDULE_ID = "${env.SCHEDULE_ID ?: params.SCHEDULE_ID}"
+        // Sử dụng SCHEDULE_ID từ parameters (giống tab Executions)
+        FINAL_SCHEDULE_ID = "${params.SCHEDULE_ID}"
     }
     
     stages {
         stage('Get Schedule ID') {
             steps {
                 script {
-                    // Thử đọc SCHEDULE_ID từ file trước
-                    def scheduleId = ''
-                    try {
-                        if (fileExists('schedule_id.txt')) {
-                            scheduleId = readFile('schedule_id.txt').trim()
-                            echo "📖 Đọc SCHEDULE_ID từ file: ${scheduleId}"
-                        }
-                    } catch (Exception e) {
-                        echo "⚠️ Không thể đọc file schedule_id.txt: ${e.message}"
-                    }
-                    
-                    // Nếu file không có, thử từ environment hoặc parameters
-                    if (!scheduleId) {
-                        scheduleId = env.SCHEDULE_ID ?: params.SCHEDULE_ID ?: ''
-                        echo "📖 Đọc SCHEDULE_ID từ env/params: ${scheduleId}"
-                    }
+                    // Đọc SCHEDULE_ID từ parameters (giống tab Executions)
+                    def scheduleId = params.SCHEDULE_ID ?: ''
+                    echo "📖 Đọc SCHEDULE_ID từ parameters: ${scheduleId}"
                     
                     // Lưu vào environment variable để sử dụng trong post actions
                     env.FINAL_SCHEDULE_ID = scheduleId
@@ -67,14 +54,8 @@ pipeline {
                 else
                     echo "❌ Không tìm thấy SCHEDULE_ID, không thể upload report"
                     echo "🔍 Debug info:"
-                    echo "   env.SCHEDULE_ID = '$SCHEDULE_ID'"
                     echo "   params.SCHEDULE_ID = '$params.SCHEDULE_ID'"
                     echo "   FINAL_SCHEDULE_ID = '$FINAL_SCHEDULE_ID'"
-                    if [ -f "schedule_id.txt" ]; then
-                        echo "   schedule_id.txt content: '$(cat schedule_id.txt)'"
-                    else
-                        echo "   schedule_id.txt không tồn tại"
-                    fi
                 fi
             '''
         }
