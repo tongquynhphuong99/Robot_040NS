@@ -7,30 +7,30 @@ pipeline {
     }
     
     parameters {
-        string(name: 'TASK_ID', defaultValue: '', description: 'Task ID from TestOps')
+        string(name: 'SCHEDULE_ID', defaultValue: '', description: 'Schedule ID from TestOps')
         string(name: 'CRON_EXPRESSION', defaultValue: '', description: 'Cron expression for scheduling')
     }
     
     stages {
         stage('Setup') {
             steps {
-                echo "=== THÔNG TIN TASK TỪ TESTOPS ==="
-                echo "Task ID: ${params.TASK_ID}"
+                echo "=== THÔNG TIN SCHEDULE TỪ TESTOPS ==="
+                echo "Schedule ID: ${params.SCHEDULE_ID}"
                 echo "Cron Expression: ${params.CRON_EXPRESSION}"
                 echo "=================================="
                 
                 script {
-                    if (params.TASK_ID && params.TASK_ID.trim() != '') {
-                        echo "✅ Task ID được truyền từ TestOps: ${params.TASK_ID}"
+                    if (params.SCHEDULE_ID && params.SCHEDULE_ID.trim() != '') {
+                        echo "✅ Schedule ID được truyền từ TestOps: ${params.SCHEDULE_ID}"
                     } else {
-                        echo "⚠️ Task ID không được truyền, sử dụng giá trị mặc định"
+                        echo "⚠️ Schedule ID không được truyền, sử dụng giá trị mặc định"
                     }
                     
                     if (params.CRON_EXPRESSION && params.CRON_EXPRESSION.trim() != '') {
                         echo "✅ Cron Expression được truyền từ TestOps: ${params.CRON_EXPRESSION}"
                         def cronParts = params.CRON_EXPRESSION.split(' ')
                         if (cronParts.length == 5) {
-                            echo "�� Cron format hợp lệ: ${cronParts}"
+                            echo " Cron format hợp lệ: ${cronParts}"
                         }
                     } else {
                         echo "⚠️ Cron Expression không được truyền, sử dụng trigger mặc định"
@@ -53,7 +53,7 @@ pipeline {
         stage('Process Results') {
             steps {
                 script {
-                    echo "�� Xử lý kết quả test cho Task: ${params.TASK_ID}"
+                    echo " Xử lý kết quả test cho Schedule: ${params.SCHEDULE_ID}"
                 }
             }
         }
@@ -63,53 +63,41 @@ pipeline {
         always {
             robot outputPath: 'results'
             sh '''
-                # Debug: Kiểm tra thư mục hiện tại và nội dung
-                echo "�� Current directory: $(pwd)"
+                echo " Current directory: $(pwd)"
                 echo "📁 Listing current directory:"
                 ls -la
                 
-                # Kiểm tra thư mục results có tồn tại không
                 if [ -d "results" ]; then
                     echo "✅ Thư mục results tồn tại"
                     echo "📁 Nội dung thư mục results:"
                     ls -la results/
                     
-                    # Nén toàn bộ thư mục kết quả (results) bao gồm report.html, log.html, output.xml, ...
                     tar czf results.tar.gz -C results .
                     echo "✅ Đã nén thư mục results thành results.tar.gz"
                     
-                    # Kiểm tra xem TASK_ID có phải là schedule_id không (bắt đầu bằng SD)
-                    if [[ "$TASK_ID" == SD* ]]; then
-                        echo "📤 Gửi report cho Schedule: $TASK_ID"
-                        # Gửi file nén về backend cho Schedule (Plans)
-                        curl -X POST -F "schedule_id=$TASK_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
+                    if [ ! -z "$SCHEDULE_ID" ]; then
+                        echo "📤 Gửi report cho Schedule: $SCHEDULE_ID"
+                        curl -X POST -F "schedule_id=$SCHEDULE_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
                     else
-                        echo "📤 Gửi report cho Task: $TASK_ID"
-                        # Gửi file nén về backend cho Task (Executions)
-                        curl -X POST -F "id_task=$TASK_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_report
+                        echo "❌ SCHEDULE_ID không được truyền!"
                     fi
                 else
                     echo "❌ Thư mục results không tồn tại!"
-                    echo "📁 Tạo thư mục results và file test"
                     mkdir -p results
                     echo "<html><body><h1>Test Report</h1><p>Robot Framework did not generate report</p></body></html>" > results/report.html
                     echo "<?xml version='1.0'?><robot><suite><status elapsed='60' status='PASS'/></suite><statistics><total><stat name='All Tests' pass='1' fail='0'/></total></statistics></robot>" > results/output.xml
-                    
-                    # Nén file test
                     tar czf results.tar.gz -C results .
                     
-                    # Gửi file test
-                    if [[ "$TASK_ID" == SD* ]]; then
-                        echo "📤 Gửi report test cho Schedule: $TASK_ID"
-                        curl -X POST -F "schedule_id=$TASK_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
+                    if [ ! -z "$SCHEDULE_ID" ]; then
+                        echo "📤 Gửi report test cho Schedule: $SCHEDULE_ID"
+                        curl -X POST -F "schedule_id=$SCHEDULE_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
                     else
-                        echo "📤 Gửi report test cho Task: $TASK_ID"
-                        curl -X POST -F "id_task=$TASK_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_report
+                        echo "❌ SCHEDULE_ID không được truyền!"
                     fi
                 fi
             '''
             script {
-                echo "🏁 Kết thúc job với Task ID: ${params.TASK_ID}"
+                echo "🏁 Kết thúc job với Schedule ID: ${params.SCHEDULE_ID}"
                 echo "📈 Robot report đã được tạo trong thư mục results/"
             }
         }
