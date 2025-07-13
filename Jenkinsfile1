@@ -11,6 +11,11 @@ pipeline {
         string(name: 'CRON_EXPRESSION', defaultValue: '', description: 'Cron expression for scheduling')
     }
     
+    environment {
+        // Sử dụng SCHEDULE_ID từ environment (được set trong job config) hoặc từ parameters
+        FINAL_SCHEDULE_ID = "${env.SCHEDULE_ID ?: params.SCHEDULE_ID}"
+    }
+    
     stages {
         stage('Run Robot Tests') {
             steps {
@@ -29,7 +34,12 @@ pipeline {
                 # Nén toàn bộ thư mục kết quả (results) bao gồm report.html, log.html, output.xml, ...
                 tar czf results.tar.gz -C results .
                 # Gửi file nén về backend
-                curl -X POST -F "schedule_id=$SCHEDULE_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
+                if [ ! -z "$FINAL_SCHEDULE_ID" ]; then
+                    echo "📤 Gửi report cho Schedule: $FINAL_SCHEDULE_ID"
+                    curl -X POST -F "schedule_id=$FINAL_SCHEDULE_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
+                else
+                    echo "❌ Không tìm thấy SCHEDULE_ID, không thể upload report"
+                fi
             '''
         }
     }
