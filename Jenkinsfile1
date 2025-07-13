@@ -12,49 +12,12 @@ pipeline {
     }
     
     stages {
-        stage('Setup') {
-            steps {
-                echo "=== THÔNG TIN SCHEDULE TỪ TESTOPS ==="
-                echo "Schedule ID: ${params.SCHEDULE_ID}"
-                echo "Cron Expression: ${params.CRON_EXPRESSION}"
-                echo "=================================="
-                
-                script {
-                    if (params.SCHEDULE_ID && params.SCHEDULE_ID.trim() != '') {
-                        echo "✅ Schedule ID được truyền từ TestOps: ${params.SCHEDULE_ID}"
-                    } else {
-                        echo "⚠️ Schedule ID không được truyền, sử dụng giá trị mặc định"
-                    }
-                    
-                    if (params.CRON_EXPRESSION && params.CRON_EXPRESSION.trim() != '') {
-                        echo "✅ Cron Expression được truyền từ TestOps: ${params.CRON_EXPRESSION}"
-                        def cronParts = params.CRON_EXPRESSION.split(' ')
-                        if (cronParts.length == 5) {
-                            echo " Cron format hợp lệ: ${cronParts}"
-                        }
-                    } else {
-                        echo "⚠️ Cron Expression không được truyền, sử dụng trigger mặc định"
-                    }
-                }
-            }
-        }
-        
         stage('Run Robot Tests') {
             steps {
                 sh '''
-                    echo "Bắt đầu chạy Robot Framework tests..."
                     mkdir -p results
                     robot --outputdir results Bases/Testcase/login.robot
-                    echo "Hoàn thành chạy tests!"
                 '''
-            }
-        }
-        
-        stage('Process Results') {
-            steps {
-                script {
-                    echo " Xử lý kết quả test cho Schedule: ${params.SCHEDULE_ID}"
-                }
             }
         }
     }
@@ -63,52 +26,11 @@ pipeline {
         always {
             robot outputPath: 'results'
             sh '''
-                echo " Current directory: $(pwd)"
-                echo "📁 Listing current directory:"
-                ls -la
-                
-                if [ -d "results" ]; then
-                    echo "✅ Thư mục results tồn tại"
-                    echo "📁 Nội dung thư mục results:"
-                    ls -la results/
-                    
-                    tar czf results.tar.gz -C results .
-                    echo "✅ Đã nén thư mục results thành results.tar.gz"
-                    
-                    if [ ! -z "$SCHEDULE_ID" ]; then
-                        echo "📤 Gửi report cho Schedule: $SCHEDULE_ID"
-                        curl -X POST -F "schedule_id=$SCHEDULE_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
-                    else
-                        echo "❌ SCHEDULE_ID không được truyền!"
-                    fi
-                else
-                    echo "❌ Thư mục results không tồn tại!"
-                    mkdir -p results
-                    echo "<html><body><h1>Test Report</h1><p>Robot Framework did not generate report</p></body></html>" > results/report.html
-                    echo "<?xml version='1.0'?><robot><suite><status elapsed='60' status='PASS'/></suite><statistics><total><stat name='All Tests' pass='1' fail='0'/></total></statistics></robot>" > results/output.xml
-                    tar czf results.tar.gz -C results .
-                    
-                    if [ ! -z "$SCHEDULE_ID" ]; then
-                        echo "📤 Gửi report test cho Schedule: $SCHEDULE_ID"
-                        curl -X POST -F "schedule_id=$SCHEDULE_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
-                    else
-                        echo "❌ SCHEDULE_ID không được truyền!"
-                    fi
-                fi
+                # Nén toàn bộ thư mục kết quả (results) bao gồm report.html, log.html, output.xml, ...
+                tar czf results.tar.gz -C results .
+                # Gửi file nén về backend
+                curl -X POST -F "schedule_id=$SCHEDULE_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
             '''
-            script {
-                echo "🏁 Kết thúc job với Schedule ID: ${params.SCHEDULE_ID}"
-                echo "📈 Robot report đã được tạo trong thư mục results/"
-                
-            }
-        }
-        
-        success {
-            echo "✅ Job chạy thành công!"
-        }
-        
-        failure {
-            echo "❌ Job chạy thất bại!"
         }
     }
 }
