@@ -85,7 +85,7 @@ pipeline {
             curl -X POST -F "id_task=$TASK_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_report
             
                
-        '''
+            '''
             script {
                 echo "🏁 Kết thúc job với Task ID: ${params.TASK_ID}"
                 echo "📈 Robot report đã được tạo trong thư mục results/"
