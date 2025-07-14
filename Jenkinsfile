@@ -24,7 +24,7 @@ pipeline {
                 # Nén toàn bộ thư mục kết quả (results) bao gồm report.html, log.html, output.xml, ...
                 tar czf results.tar.gz -C results .
                 # Gửi file nén về backend (có thể comment lại nếu chưa cần)
-                # curl -X POST -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_report
+                # curl -X POST -F "report=@results.tar.gz" http://192.168.240.56:8000/upload_report
             '''
         }
     }
