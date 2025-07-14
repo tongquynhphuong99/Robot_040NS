@@ -24,11 +24,11 @@ pipeline {
                 robot outputPath: 'results'
 
                 // ✅ Nén và chuẩn bị gửi report
-                sh '''
-                    tar czf results.tar.gz -C results .
+                // sh '''
+                //     tar czf results.tar.gz -C results .
 
-                    # curl -X POST -F "report=@results.tar.gz" http://192.168.240.56:8000/upload_report
-                '''
+                //     # curl -X POST -F "report=@results.tar.gz" http://192.168.240.56:8000/upload_report
+                // '''
             }
         }
     }
