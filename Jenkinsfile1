@@ -5,32 +5,8 @@ pipeline {
             args '-u root'
         }
     }
-    
-    parameters {
-        string(name: 'SCHEDULE_ID', defaultValue: '', description: 'Schedule ID from TestOps')
-        string(name: 'CRON_EXPRESSION', defaultValue: '', description: 'Cron expression for scheduling')
-    }
-    
-    environment {
-        // Sử dụng JOB_NAME làm SCHEDULE_ID (mỗi job = 1 schedule)
-        FINAL_SCHEDULE_ID = "${env.JOB_NAME}"
-    }
-    
+
     stages {
-        stage('Get Schedule ID') {
-            steps {
-                script {
-                    // Sử dụng JOB_NAME làm schedule ID
-                    def scheduleId = env.JOB_NAME ?: ''
-                    echo "📖 Sử dụng JOB_NAME làm SCHEDULE_ID: ${scheduleId}"
-                    
-                    // Lưu vào environment variable để sử dụng trong post actions
-                    env.FINAL_SCHEDULE_ID = scheduleId
-                    echo "✅ FINAL_SCHEDULE_ID = ${env.FINAL_SCHEDULE_ID}"
-                }
-            }
-        }
-        
         stage('Run Robot Tests') {
             steps {
                 sh '''
@@ -43,21 +19,17 @@ pipeline {
 
     post {
         always {
-            robot outputPath: 'results'
-            sh '''
-                # Nén toàn bộ thư mục kết quả (results) bao gồm report.html, log.html, output.xml, ...
-                tar czf results.tar.gz -C results .
-                # Gửi file nén về backend
-                if [ ! -z "$FINAL_SCHEDULE_ID" ]; then
-                    echo "📤 Gửi report cho Schedule: $FINAL_SCHEDULE_ID"
-                    curl -X POST -F "schedule_id=$FINAL_SCHEDULE_ID" -F "report=@results.tar.gz" http://192.168.1.31:8000/upload_schedule_report
-                else
-                    echo "❌ Không tìm thấy SCHEDULE_ID, không thể upload report"
-                    echo "🔍 Debug info:"
-                    echo "   JOB_NAME = '$JOB_NAME'"
-                    echo "   FINAL_SCHEDULE_ID = '$FINAL_SCHEDULE_ID'"
-                fi
-            '''
+            script {
+                // ✅ Phân tích kết quả Robot Framework
+                robot outputPath: 'results'
+
+                // ✅ Nén và chuẩn bị gửi report
+                // sh '''
+                //     tar czf results.tar.gz -C results .
+
+                //     # curl -X POST -F "report=@results.tar.gz" http://192.168.240.56:8000/upload_report
+                // '''
+            }
         }
     }
 }
