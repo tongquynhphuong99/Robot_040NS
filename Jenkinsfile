@@ -5,7 +5,7 @@ pipeline {
             args '-u root'
         }
     }
-    
+
     stages {
         stage('Run Robot Tests') {
             steps {
@@ -15,22 +15,21 @@ pipeline {
                 '''
             }
         }
-        stage('Cleanup') {
-            steps {
-                cleanWs()  // 🔁 Xóa sạch workspace
-            }
-        }
     }
 
     post {
         always {
-            robot outputPath: 'results'
-            sh '''
-                # Nén toàn bộ thư mục kết quả (results) bao gồm report.html, log.html, output.xml, ...
-                tar czf results.tar.gz -C results .
-                # Gửi file nén về backend (có thể comment lại nếu chưa cần)
-                # curl -X POST -F "report=@results.tar.gz" http://192.168.240.56:8000/upload_report
-            '''
+            script {
+                // ✅ Phân tích kết quả Robot Framework
+                robot outputPath: 'results'
+
+                // ✅ Nén và chuẩn bị gửi report
+                sh '''
+                    tar czf results.tar.gz -C results .
+
+                    # curl -X POST -F "report=@results.tar.gz" http://192.168.240.56:8000/upload_report
+                '''
+            }
         }
     }
 }
