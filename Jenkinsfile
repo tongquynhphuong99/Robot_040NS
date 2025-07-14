@@ -15,6 +15,11 @@ pipeline {
                 '''
             }
         }
+        stage('Cleanup') {
+            steps {
+                cleanWs()  // 🔁 Xóa sạch workspace
+            }
+        }
     }
 
     post {
