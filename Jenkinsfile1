@@ -23,12 +23,13 @@ pipeline {
                 // ✅ Phân tích kết quả Robot Framework
                 robot outputPath: 'results'
 
-                // ✅ Nén và chuẩn bị gửi report
-                // sh '''
-                //     tar czf results.tar.gz -C results .
-
-                //     # curl -X POST -F "report=@results.tar.gz" http://192.168.240.56:8000/upload_report
-                // '''
+                // ✅ Gửi report về backend (sử dụng plugin HTTP Request)
+                httpRequest(
+                    url: 'http://localhost:8000/api/reports/jenkins/save-plan-report/1',
+                    httpMode: 'POST',
+                    contentType: 'APPLICATION_JSON',
+                    requestBody: '{"plan_id": 1, "jenkins_job": "TestTrigger"}'
+                )
             }
         }
     }
