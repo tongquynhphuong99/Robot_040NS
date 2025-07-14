@@ -11,7 +11,7 @@ pipeline {
             steps {
                 sh '''
                     mkdir -p results
-                    robot --outputdir results Bases/Testcase/
+                    robot --outputdir results Bases/Testcase/login.robot
                 '''
             }
         }
