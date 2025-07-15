@@ -33,7 +33,7 @@ pipeline {
         success {
             script {
                 // ✅ Gửi webhook khi build thành công
-                def webhookUrl = 'http://localhost:8000/api/reports/jenkins/webhook'
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
                 def payload = [
                     name: env.JOB_NAME,
                     build: [
