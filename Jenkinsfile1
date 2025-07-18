@@ -33,7 +33,7 @@ pipeline {
         success {
             script {
                 // ✅ Gửi webhook khi build thành công
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/save-plan-report/2'
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/save-plan-report/1'
                 def payload = [
                     name: env.JOB_NAME,
                     build: [
@@ -61,7 +61,7 @@ pipeline {
         failure {
             script {
                 // ✅ Gửi webhook ngay cả khi build thất bại
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/save-plan-report/2'
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/save-plan-report/1'
                 def payload = [
                     name: env.JOB_NAME,
                     build: [
@@ -82,7 +82,7 @@ pipeline {
                     validResponseCodes: '200,201,202'
                 )
                 
-                echo "❌ Build failed, but webhook sent to backend for job: ${env.JOB_NAME}"
+                echo "✅ Webhook sent to backend for failed job: ${env.JOB_NAME}"
             }
         }
     }
