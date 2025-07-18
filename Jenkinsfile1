@@ -33,7 +33,7 @@ pipeline {
         success {
             script {
                 // ✅ Gửi webhook khi build thành công
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/save-plan-report/2'
                 def payload = [
                     name: env.JOB_NAME,
                     build: [
@@ -60,7 +60,29 @@ pipeline {
         
         failure {
             script {
-                echo "❌ Build failed, skipping webhook"
+                // ✅ Gửi webhook ngay cả khi build thất bại
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/save-plan-report/2'
+                def payload = [
+                    name: env.JOB_NAME,
+                    build: [
+                        number: env.BUILD_NUMBER,
+                        result: currentBuild.result,
+                        status: 'FINISHED',
+                        timestamp: currentBuild.startTimeInMillis,
+                        duration: currentBuild.duration
+                    ]
+                ]
+                
+                // Gửi HTTP request đến webhook
+                httpRequest(
+                    url: webhookUrl,
+                    httpMode: 'POST',
+                    contentType: 'APPLICATION_JSON',
+                    requestBody: groovy.json.JsonOutput.toJson(payload),
+                    validResponseCodes: '200,201,202'
+                )
+                
+                echo "❌ Build failed, but webhook sent to backend for job: ${env.JOB_NAME}"
             }
         }
     }
