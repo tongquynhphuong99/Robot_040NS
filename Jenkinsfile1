@@ -6,6 +6,12 @@ pipeline {
         }
     }
 
+    environment {
+        // Có thể set từ Jenkins job parameters hoặc build parameters
+        TASK_TYPE = "${params.TASK_TYPE ?: 'execution'}"  // 'execution' hoặc 'plan'
+        TASK_ID = "${params.TASK_ID ?: '1'}"  // ID của execution hoặc plan
+    }
+
     stages {
         stage('Run Robot Tests') {
             steps {
@@ -33,7 +39,7 @@ pipeline {
         success {
             script {
                 // ✅ Gửi webhook khi build thành công
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/save-plan-report/1'
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
                 def payload = [
                     name: env.JOB_NAME,
                     build: [
@@ -42,7 +48,9 @@ pipeline {
                         status: 'FINISHED',
                         timestamp: currentBuild.startTimeInMillis,
                         duration: currentBuild.duration
-                    ]
+                    ],
+                    task_type: env.TASK_TYPE,
+                    task_id: env.TASK_ID
                 ]
                 
                 // Gửi HTTP request đến webhook
@@ -54,14 +62,14 @@ pipeline {
                     validResponseCodes: '200,201,202'
                 )
                 
-                echo "✅ Webhook sent to backend for job: ${env.JOB_NAME}"
+                echo "✅ Webhook sent to backend for ${env.TASK_TYPE} job: ${env.JOB_NAME} (ID: ${env.TASK_ID})"
             }
         }
         
         failure {
             script {
                 // ✅ Gửi webhook ngay cả khi build thất bại
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/save-plan-report/1'
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
                 def payload = [
                     name: env.JOB_NAME,
                     build: [
@@ -70,7 +78,9 @@ pipeline {
                         status: 'FINISHED',
                         timestamp: currentBuild.startTimeInMillis,
                         duration: currentBuild.duration
-                    ]
+                    ],
+                    task_type: env.TASK_TYPE,
+                    task_id: env.TASK_ID
                 ]
                 
                 // Gửi HTTP request đến webhook
@@ -82,7 +92,7 @@ pipeline {
                     validResponseCodes: '200,201,202'
                 )
                 
-                echo "✅ Webhook sent to backend for failed job: ${env.JOB_NAME}"
+                echo "✅ Webhook sent to backend for failed ${env.TASK_TYPE} job: ${env.JOB_NAME} (ID: ${env.TASK_ID})"
             }
         }
     }
