@@ -6,25 +6,6 @@ pipeline {
         }
     }
 
-    parameters {
-        choice(
-            name: 'TASK_TYPE',
-            choices: ['execution', 'plan'],
-            description: 'Loại task: execution (chạy thủ công) hoặc plan (lịch trình)'
-        )
-        string(
-            name: 'TASK_ID',
-            defaultValue: '1',
-            description: 'ID của execution hoặc plan'
-        )
-    }
-
-    environment {
-        // Sử dụng parameters từ Jenkins job
-        TASK_TYPE = "${params.TASK_TYPE}"
-        TASK_ID = "${params.TASK_ID}"
-    }
-
     stages {
         stage('Run Robot Tests') {
             steps {
@@ -61,9 +42,7 @@ pipeline {
                         status: 'FINISHED',
                         timestamp: currentBuild.startTimeInMillis,
                         duration: currentBuild.duration
-                    ],
-                    task_type: env.TASK_TYPE,
-                    task_id: env.TASK_ID
+                    ]
                 ]
                 
                 // Gửi HTTP request đến webhook
@@ -75,7 +54,7 @@ pipeline {
                     validResponseCodes: '200,201,202'
                 )
                 
-                echo "✅ Webhook sent to backend for ${env.TASK_TYPE} job: ${env.JOB_NAME} (ID: ${env.TASK_ID})"
+                echo "✅ Webhook sent to backend for job: ${env.JOB_NAME}"
             }
         }
         
@@ -91,9 +70,7 @@ pipeline {
                         status: 'FINISHED',
                         timestamp: currentBuild.startTimeInMillis,
                         duration: currentBuild.duration
-                    ],
-                    task_type: env.TASK_TYPE,
-                    task_id: env.TASK_ID
+                    ]
                 ]
                 
                 // Gửi HTTP request đến webhook
@@ -105,7 +82,7 @@ pipeline {
                     validResponseCodes: '200,201,202'
                 )
                 
-                echo "✅ Webhook sent to backend for failed ${env.TASK_TYPE} job: ${env.JOB_NAME} (ID: ${env.TASK_ID})"
+                echo "✅ Webhook sent to backend for failed job: ${env.JOB_NAME}"
             }
         }
     }
