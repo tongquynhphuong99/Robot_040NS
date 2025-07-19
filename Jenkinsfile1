@@ -6,10 +6,23 @@ pipeline {
         }
     }
 
+    parameters {
+        choice(
+            name: 'TASK_TYPE',
+            choices: ['execution', 'plan'],
+            description: 'Loại task: execution (chạy thủ công) hoặc plan (lịch trình)'
+        )
+        string(
+            name: 'TASK_ID',
+            defaultValue: '1',
+            description: 'ID của execution hoặc plan'
+        )
+    }
+
     environment {
-        // Có thể set từ Jenkins job parameters hoặc build parameters
-        TASK_TYPE = "${params.TASK_TYPE ?: 'execution'}"  // 'execution' hoặc 'plan'
-        TASK_ID = "${params.TASK_ID ?: '1'}"  // ID của execution hoặc plan
+        // Sử dụng parameters từ Jenkins job
+        TASK_TYPE = "${params.TASK_TYPE}"
+        TASK_ID = "${params.TASK_ID}"
     }
 
     stages {
