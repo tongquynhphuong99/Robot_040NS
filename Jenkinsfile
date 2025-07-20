@@ -1,27 +1,37 @@
-aborted {
-    script {
-        // ✅ Gửi webhook khi job bị hủy
-        def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
-        def payload = [
-            name: env.JOB_NAME,
-            build: [
-                number: env.BUILD_NUMBER,
-                result: currentBuild.result,  // Sẽ là "ABORTED"
-                status: 'FINISHED',
-                timestamp: currentBuild.startTimeInMillis,
-                duration: currentBuild.duration
+post {
+    always {
+        script {
+            // ✅ Phân tích kết quả Robot Framework
+            robot outputPath: 'results'
+            
+            // ✅ Nén và chuẩn bị gửi report
+            sh '''
+                tar czf results.tar.gz -C results .
+            '''
+            
+            // ✅ Gửi webhook cho tất cả trạng thái (success, failure, aborted)
+            def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
+            def payload = [
+                name: env.JOB_NAME,
+                build: [
+                    number: env.BUILD_NUMBER,
+                    result: currentBuild.result,  // Tự động là SUCCESS/FAILURE/ABORTED
+                    status: 'FINISHED',
+                    timestamp: currentBuild.startTimeInMillis,
+                    duration: currentBuild.duration
+                ]
             ]
-        ]
-        
-        // Gửi HTTP request đến webhook
-        httpRequest(
-            url: webhookUrl,
-            httpMode: 'POST',
-            contentType: 'APPLICATION_JSON',
-            requestBody: groovy.json.JsonOutput.toJson(payload),
-            validResponseCodes: '200,201,202'
-        )
-        
-        echo "✅ Webhook sent to backend for aborted job: ${env.JOB_NAME}"
+            
+            // Gửi HTTP request đến webhook
+            httpRequest(
+                url: webhookUrl,
+                httpMode: 'POST',
+                contentType: 'APPLICATION_JSON',
+                requestBody: groovy.json.JsonOutput.toJson(payload),
+                validResponseCodes: '200,201,202'
+            )
+            
+            echo "✅ Webhook sent to backend for job: ${env.JOB_NAME} with result: ${currentBuild.result}"
+        }
     }
 }
