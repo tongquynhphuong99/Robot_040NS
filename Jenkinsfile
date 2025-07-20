@@ -27,14 +27,14 @@ pipeline {
     }
     
     post {
-        always {
+        success {
             script {
                 def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
                 def payload = [
                     name: env.JOB_NAME,
                     build: [
                         number: env.BUILD_NUMBER,
-                        result: currentBuild.result,
+                        result: 'SUCCESS',
                         status: 'FINISHED',
                         timestamp: currentBuild.startTimeInMillis,
                         duration: currentBuild.duration
@@ -49,7 +49,59 @@ pipeline {
                     validResponseCodes: '200,201,202'
                 )
                 
-                echo "Webhook sent to backend for job: ${env.JOB_NAME} with result: ${currentBuild.result}"
+                echo "✅ Webhook sent to backend for job: ${env.JOB_NAME} with result: SUCCESS"
+            }
+        }
+        
+        failure {
+            script {
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
+                def payload = [
+                    name: env.JOB_NAME,
+                    build: [
+                        number: env.BUILD_NUMBER,
+                        result: 'FAILURE',
+                        status: 'FINISHED',
+                        timestamp: currentBuild.startTimeInMillis,
+                        duration: currentBuild.duration
+                    ]
+                ]
+                
+                httpRequest(
+                    url: webhookUrl,
+                    httpMode: 'POST',
+                    contentType: 'APPLICATION_JSON',
+                    requestBody: groovy.json.JsonOutput.toJson(payload),
+                    validResponseCodes: '200,201,202'
+                )
+                
+                echo "❌ Webhook sent to backend for job: ${env.JOB_NAME} with result: FAILURE"
+            }
+        }
+        
+        aborted {
+            script {
+                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
+                def payload = [
+                    name: env.JOB_NAME,
+                    build: [
+                        number: env.BUILD_NUMBER,
+                        result: 'ABORTED',
+                        status: 'FINISHED',
+                        timestamp: currentBuild.startTimeInMillis,
+                        duration: currentBuild.duration
+                    ]
+                ]
+                
+                httpRequest(
+                    url: webhookUrl,
+                    httpMode: 'POST',
+                    contentType: 'APPLICATION_JSON',
+                    requestBody: groovy.json.JsonOutput.toJson(payload),
+                    validResponseCodes: '200,201,202'
+                )
+                
+                echo "⏹️ Webhook sent to backend for job: ${env.JOB_NAME} with result: ABORTED"
             }
         }
     }
