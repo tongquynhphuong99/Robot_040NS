@@ -1,89 +1,27 @@
-pipeline {
-    agent {
-        docker {
-            image 'demopq/robot-python-sele-chor:phuongttq'
-            args '-u root'
-        }
-    }
-
-    stages {
-        stage('Run Robot Tests') {
-            steps {
-                sh '''
-                    mkdir -p results
-                    robot --outputdir results Bases/Testcase/login.robot
-                '''
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                // ✅ Phân tích kết quả Robot Framework
-                robot outputPath: 'results'
-
-                // ✅ Nén và chuẩn bị gửi report
-                sh '''
-                    tar czf results.tar.gz -C results .
-                '''
-            }
-        }
+aborted {
+    script {
+        // ✅ Gửi webhook khi job bị hủy
+        def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
+        def payload = [
+            name: env.JOB_NAME,
+            build: [
+                number: env.BUILD_NUMBER,
+                result: currentBuild.result,  // Sẽ là "ABORTED"
+                status: 'FINISHED',
+                timestamp: currentBuild.startTimeInMillis,
+                duration: currentBuild.duration
+            ]
+        ]
         
-        success {
-            script {
-                // ✅ Gửi webhook khi build thành công
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
-                def payload = [
-                    name: env.JOB_NAME,
-                    build: [
-                        number: env.BUILD_NUMBER,
-                        result: currentBuild.result,
-                        status: 'FINISHED',
-                        timestamp: currentBuild.startTimeInMillis,
-                        duration: currentBuild.duration
-                    ]
-                ]
-                
-                // Gửi HTTP request đến webhook
-                httpRequest(
-                    url: webhookUrl,
-                    httpMode: 'POST',
-                    contentType: 'APPLICATION_JSON',
-                    requestBody: groovy.json.JsonOutput.toJson(payload),
-                    validResponseCodes: '200,201,202'
-                )
-                
-                echo "✅ Webhook sent to backend for job: ${env.JOB_NAME}"
-            }
-        }
+        // Gửi HTTP request đến webhook
+        httpRequest(
+            url: webhookUrl,
+            httpMode: 'POST',
+            contentType: 'APPLICATION_JSON',
+            requestBody: groovy.json.JsonOutput.toJson(payload),
+            validResponseCodes: '200,201,202'
+        )
         
-        failure {
-            script {
-                // ✅ Gửi webhook ngay cả khi build thất bại
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
-                def payload = [
-                    name: env.JOB_NAME,
-                    build: [
-                        number: env.BUILD_NUMBER,
-                        result: currentBuild.result,
-                        status: 'FINISHED',
-                        timestamp: currentBuild.startTimeInMillis,
-                        duration: currentBuild.duration
-                    ]
-                ]
-                
-                // Gửi HTTP request đến webhook
-                httpRequest(
-                    url: webhookUrl,
-                    httpMode: 'POST',
-                    contentType: 'APPLICATION_JSON',
-                    requestBody: groovy.json.JsonOutput.toJson(payload),
-                    validResponseCodes: '200,201,202'
-                )
-                
-                echo "✅ Webhook sent to backend for failed job: ${env.JOB_NAME}"
-            }
-        }
+        echo "✅ Webhook sent to backend for aborted job: ${env.JOB_NAME}"
     }
 }
