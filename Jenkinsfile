@@ -5,9 +5,6 @@ pipeline {
             args '-u root'
         }
     }
-    triggers {
-    pollSCM('H/5 * * * *') // hoặc dùng webhook
-    }
     stages {
         stage('Run Robot Tests') {
             steps {
