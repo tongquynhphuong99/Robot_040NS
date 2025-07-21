@@ -6,7 +6,7 @@ pipeline {
         }
     }
     triggers {
-    pollSCM('H/5 * * * *') // Kiểm tra source mỗi 5 phút, nếu có thay đổi thì build
+        pollSCM('H/5 * * * *') // Kiểm tra source mỗi 5 phút, nếu có thay đổi thì build
     }
     stages {
         stage('Run Robot Tests') {
