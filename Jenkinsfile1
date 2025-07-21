@@ -5,9 +5,7 @@ pipeline {
             args '-u root'
         }
     }
-    triggers {
-        pollSCM('H/2 * * * *') // Kiểm tra source mỗi 5 phút, nếu có thay đổi thì build
-    }
+    
     stages {
         stage('Run Robot Tests') {
             steps {
