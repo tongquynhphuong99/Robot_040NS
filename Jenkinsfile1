@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'demopq/robot-python-sele-chor:phuongttq'
-            args '-u root'
-        }
-    }
-    
+    agent any
     stages {
         stage('Run Robot Tests') {
             steps {
@@ -15,7 +9,6 @@ pipeline {
                 '''
             }
         }
-        
         stage('Process Results') {
             steps {
                 robot outputPath: 'results'
@@ -25,7 +18,6 @@ pipeline {
             }
         }
     }
-    
     post {
         success {
             script {
@@ -40,7 +32,6 @@ pipeline {
                         duration: currentBuild.duration
                     ]
                 ]
-                
                 httpRequest(
                     url: webhookUrl,
                     httpMode: 'POST',
@@ -48,11 +39,9 @@ pipeline {
                     requestBody: groovy.json.JsonOutput.toJson(payload),
                     validResponseCodes: '200,201,202'
                 )
-                
                 echo "✅ Webhook sent to backend for job: ${env.JOB_NAME} with result: SUCCESS"
             }
         }
-        
         failure {
             script {
                 def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
@@ -66,7 +55,6 @@ pipeline {
                         duration: currentBuild.duration
                     ]
                 ]
-                
                 httpRequest(
                     url: webhookUrl,
                     httpMode: 'POST',
@@ -74,11 +62,9 @@ pipeline {
                     requestBody: groovy.json.JsonOutput.toJson(payload),
                     validResponseCodes: '200,201,202'
                 )
-                
                 echo "❌ Webhook sent to backend for job: ${env.JOB_NAME} with result: FAILURE"
             }
         }
-        
         aborted {
             script {
                 def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
@@ -92,7 +78,6 @@ pipeline {
                         duration: currentBuild.duration
                     ]
                 ]
-                
                 httpRequest(
                     url: webhookUrl,
                     httpMode: 'POST',
@@ -100,7 +85,6 @@ pipeline {
                     requestBody: groovy.json.JsonOutput.toJson(payload),
                     validResponseCodes: '200,201,202'
                 )
-                
                 echo "⏹️ Webhook sent to backend for job: ${env.JOB_NAME} with result: ABORTED"
             }
         }
