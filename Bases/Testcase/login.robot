@@ -42,7 +42,7 @@ loginWebgui
     Click Button    id:loginbutton
 
 logoutwebgui
-    Sleep    3
+    Sleep    10
     Select Frame    header
     Click Element    xpath://*[@id="logOut"]/font
     Unselect Frame    
