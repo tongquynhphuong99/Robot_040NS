@@ -43,6 +43,7 @@ loginWebgui
 
 logoutwebgui
     Sleep    10
+    Wait Until Element Is Visible    header    timeout=10s
     Select Frame    header
     Click Element    xpath://*[@id="logOut"]/font
     Unselect Frame    
