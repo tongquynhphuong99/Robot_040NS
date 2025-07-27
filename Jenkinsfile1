@@ -5,13 +5,94 @@ pipeline {
             args '-u root'
         }
     }
+    
+    // Thêm TASK_ID parameter
+    parameters {
+        string(name: 'TASK_ID', defaultValue: '', description: 'Task ID from TestOps (e.g., TASK-001, PLAN-001, CICD-001)')
+    }
+    
+    // Dynamic triggers dựa trên TASK_ID
+    triggers {
+        // Cron schedule cho PLAN tasks
+        cron(env.CRON_SCHEDULE ?: '')
+        // SCM polling cho CICD tasks
+        pollSCM(env.SCM_POLL ?: '')
+    }
+    
     stages {
+        stage('Setup') {
+            steps {
+                script {
+                    // Xác định task type từ TASK_ID
+                    def taskType = ''
+                    def taskPrefix = ''
+                    
+                    if (params.TASK_ID.startsWith('TASK-')) {
+                        taskType = 'execution'
+                        taskPrefix = 'TASK'
+                    } else if (params.TASK_ID.startsWith('PLAN-')) {
+                        taskType = 'plan'
+                        taskPrefix = 'PLAN'
+                    } else if (params.TASK_ID.startsWith('CICD-')) {
+                        taskType = 'cicd'
+                        taskPrefix = 'CICD'
+                    } else {
+                        error "Invalid TASK_ID format: ${params.TASK_ID}. Must start with TASK-, PLAN-, or CICD-"
+                    }
+                    
+                    // Set environment variables
+                    env.TASK_TYPE = taskType
+                    env.TASK_PREFIX = taskPrefix
+                    
+                    echo "Starting ${taskType} for Task ID: ${params.TASK_ID}"
+                    echo "Job Name: ${env.JOB_NAME}"
+                    echo "Build Number: ${env.BUILD_NUMBER}"
+                    echo "Task Type: ${env.TASK_TYPE}"
+                    
+                    // Log additional info based on task type
+                    if (taskType == 'plan' && env.CRON_SCHEDULE) {
+                        echo "Cron Schedule: ${env.CRON_SCHEDULE}"
+                    }
+                    if (taskType == 'cicd' && env.SCM_POLL) {
+                        echo "SCM Poll: ${env.SCM_POLL}"
+                    }
+                }
+            }
+        }
+        
+        stage('Checkout') {
+            when {
+                expression { env.TASK_TYPE == 'cicd' }
+            }
+            steps {
+                echo "Checking out source code for CI/CD..."
+                checkout scm
+            }
+        }
+        
         stage('Run Robot Tests') {
             steps {
-                sh '''
-                    mkdir -p results
-                    robot --outputdir results Bases/Testcase/login.robot
-                '''
+                script {
+                    def stageName = ''
+                    switch(env.TASK_TYPE) {
+                        case 'execution':
+                            stageName = 'Running Execution Tests'
+                            break
+                        case 'plan':
+                            stageName = 'Running Scheduled Plan Tests'
+                            break
+                        case 'cicd':
+                            stageName = 'Running CI/CD Tests'
+                            break
+                    }
+                    
+                    echo "${stageName}..."
+                    
+                    sh '''
+                        mkdir -p results
+                        robot --outputdir results Bases/Testcase/login.robot
+                    '''
+                }
             }
         }
         
@@ -23,84 +104,110 @@ pipeline {
                 '''
             }
         }
+        
+        stage('Deploy') {
+            when {
+                allOf(
+                    expression { env.TASK_TYPE == 'cicd' },
+                    expression { currentBuild.result == 'SUCCESS' }
+                )
+            }
+            steps {
+                echo "Deploying application for CI/CD..."
+                // Thêm deployment steps ở đây
+                // Ví dụ: docker build, docker push, kubectl apply, etc.
+            }
+        }
     }
     
     post {
-        success {
+        always {
             script {
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
-                def payload = [
+                echo "Sending webhook to TestOps backend..."
+                
+                // Chuẩn bị webhook data với TASK_ID
+                def webhookData = [
                     name: env.JOB_NAME,
                     build: [
                         number: env.BUILD_NUMBER,
-                        result: 'SUCCESS',
-                        status: 'FINISHED',
+                        result: currentBuild.result,
+                        status: currentBuild.currentResult,
                         timestamp: currentBuild.startTimeInMillis,
-                        duration: currentBuild.duration
+                        duration: currentBuild.duration,
+                        parameters: [
+                            TASK_ID: params.TASK_ID
+                        ]
                     ]
                 ]
                 
-                httpRequest(
-                    url: webhookUrl,
-                    httpMode: 'POST',
-                    contentType: 'APPLICATION_JSON',
-                    requestBody: groovy.json.JsonOutput.toJson(payload),
-                    validResponseCodes: '200,201,202'
-                )
-                
-                echo "✅ Webhook sent to backend for job: ${env.JOB_NAME} with result: SUCCESS"
+                // Gửi webhook đến backend
+                try {
+                    httpRequest(
+                        url: 'http://backend:8000/api/reports/jenkins/webhook',
+                        httpMode: 'POST',
+                        contentType: 'APPLICATION_JSON',
+                        requestBody: groovy.json.JsonOutput.toJson(webhookData),
+                        validResponseCodes: '200,201,202'
+                    )
+                    
+                    echo "✅ Webhook sent successfully"
+                } catch (Exception e) {
+                    echo "❌ Failed to send webhook: ${e.getMessage()}"
+                }
+            }
+        }
+        
+        success {
+            script {
+                def successMessage = ''
+                switch(env.TASK_TYPE) {
+                    case 'execution':
+                        successMessage = '✅ Execution completed successfully'
+                        break
+                    case 'plan':
+                        successMessage = '✅ Scheduled plan completed successfully'
+                        break
+                    case 'cicd':
+                        successMessage = '✅ CI/CD pipeline completed successfully'
+                        break
+                }
+                echo successMessage
             }
         }
         
         failure {
             script {
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
-                def payload = [
-                    name: env.JOB_NAME,
-                    build: [
-                        number: env.BUILD_NUMBER,
-                        result: 'FAILURE',
-                        status: 'FINISHED',
-                        timestamp: currentBuild.startTimeInMillis,
-                        duration: currentBuild.duration
-                    ]
-                ]
-                
-                httpRequest(
-                    url: webhookUrl,
-                    httpMode: 'POST',
-                    contentType: 'APPLICATION_JSON',
-                    requestBody: groovy.json.JsonOutput.toJson(payload),
-                    validResponseCodes: '200,201,202'
-                )
-                
-                echo "❌ Webhook sent to backend for job: ${env.JOB_NAME} with result: FAILURE"
+                def failureMessage = ''
+                switch(env.TASK_TYPE) {
+                    case 'execution':
+                        failureMessage = '❌ Execution failed'
+                        break
+                    case 'plan':
+                        failureMessage = '❌ Scheduled plan failed'
+                        break
+                    case 'cicd':
+                        failureMessage = '❌ CI/CD pipeline failed'
+                        break
+                }
+                echo failureMessage
             }
         }
         
         aborted {
             script {
-                def webhookUrl = 'http://backend:8000/api/reports/jenkins/webhook'
-                def payload = [
-                    name: env.JOB_NAME,
-                    build: [
-                        number: env.BUILD_NUMBER,
-                        result: 'ABORTED',
-                        status: 'FINISHED',
-                        timestamp: currentBuild.startTimeInMillis,
-                        duration: currentBuild.duration
-                    ]
-                ]
-                
-                httpRequest(
-                    url: webhookUrl,
-                    httpMode: 'POST',
-                    contentType: 'APPLICATION_JSON',
-                    requestBody: groovy.json.JsonOutput.toJson(payload),
-                    validResponseCodes: '200,201,202'
-                )
-                
-                echo "⏹️ Webhook sent to backend for job: ${env.JOB_NAME} with result: ABORTED"
+                def abortedMessage = ''
+                switch(env.TASK_TYPE) {
+                    case 'execution':
+                        abortedMessage = '⚠️ Execution was aborted'
+                        break
+                    case 'plan':
+                        abortedMessage = '⚠️ Scheduled plan was aborted'
+                        break
+                    case 'cicd':
+                        abortedMessage = '⚠️ CI/CD pipeline was aborted'
+                        break
+                }
+                echo abortedMessage
             }
         }
     }
