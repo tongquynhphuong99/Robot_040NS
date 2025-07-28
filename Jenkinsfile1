@@ -20,17 +20,26 @@ pipeline {
             steps {
                 script {
                     def taskType = ''
-                    if (params.TASK_ID.startsWith('TASK-')) {
-                        taskType = 'execution'
-                    } else if (params.TASK_ID.startsWith('PLAN-')) {
-                        taskType = 'plan'
-                    } else if (params.TASK_ID.startsWith('CICD-')) {
-                        taskType = 'cicd'
+                    def taskId = params.TASK_ID ?: ''
+                    
+                    if (taskId && taskId.trim()) {
+                        if (taskId.startsWith('TASK-')) {
+                            taskType = 'execution'
+                        } else if (taskId.startsWith('PLAN-')) {
+                            taskType = 'plan'
+                        } else if (taskId.startsWith('CICD-')) {
+                            taskType = 'cicd'
+                        } else {
+                            error "Invalid TASK_ID format: ${taskId}"
+                        }
+                        echo "Starting ${taskType} for Task ID: ${taskId}"
                     } else {
-                        error "Invalid TASK_ID format: ${params.TASK_ID}"
+                        // Khi chạy theo GitHub trigger, không có TASK_ID parameter
+                        // Nhưng webhook JSON sẽ chứa task_id cố định từ config
+                        taskType = 'cicd' // Mặc định là cicd khi chạy theo GitHub trigger
+                        echo "Starting scheduled ${taskType} (TASK_ID will be provided by webhook JSON)"
                     }
                     env.TASK_TYPE = taskType
-                    echo "Starting ${taskType} for Task ID: ${params.TASK_ID}"
                     
                     // Gửi webhook khi job bắt đầu chạy
                     def startWebhookData = [
@@ -40,12 +49,14 @@ pipeline {
                             result: 'BUILDING',
                             status: 'BUILDING',
                             timestamp: currentBuild.startTimeInMillis,
-                            duration: 0,
-                            parameters: [
-                                TASK_ID: params.TASK_ID
-                            ]
+                            duration: 0
                         ]
                     ]
+                    
+                    // Chỉ thêm TASK_ID vào parameters nếu có giá trị
+                    if (taskId && taskId.trim()) {
+                        startWebhookData.build.parameters = [TASK_ID: taskId]
+                    }
                     
                     try {
                         httpRequest(
@@ -119,6 +130,8 @@ pipeline {
     post {
         always {
             script {
+                def taskId = params.TASK_ID ?: ''
+                
                 def webhookData = [
                     name: env.JOB_NAME,
                     build: [
@@ -126,12 +139,14 @@ pipeline {
                         result: currentBuild.result,
                         status: currentBuild.currentResult,
                         timestamp: currentBuild.startTimeInMillis,
-                        duration: currentBuild.duration,
-                        parameters: [
-                            TASK_ID: params.TASK_ID
-                        ]
+                        duration: currentBuild.duration
                     ]
                 ]
+                
+                // Chỉ thêm TASK_ID vào parameters nếu có giá trị
+                if (taskId && taskId.trim()) {
+                    webhookData.build.parameters = [TASK_ID: taskId]
+                }
                 
                 try {
                     httpRequest(
