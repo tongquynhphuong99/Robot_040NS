@@ -12,7 +12,7 @@ pipeline {
     
     triggers {
         cron(env.CRON_SCHEDULE ?: '')
-        pollSCM(env.SCM_POLL ?: '')
+        //pollSCM(env.SCM_POLL ?: '')
     }
     
     stages {
