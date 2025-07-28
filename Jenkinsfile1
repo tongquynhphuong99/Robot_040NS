@@ -56,10 +56,11 @@ pipeline {
                     if (taskId && taskId.trim()) {
                         startWebhookData.build.parameters = [TASK_ID: taskId]
                     } else if (env.TASK_TYPE == 'cicd') {
-                        // Với CI/CD, lấy TASK_ID từ defaultValue trong Jenkins config
-                        // Nếu không có defaultValue, bỏ qua webhook để tránh lỗi
-                        if (taskId && taskId.trim()) {
-                            startWebhookData.build.parameters = [TASK_ID: taskId]
+                        // Với CI/CD, lấy TASK_ID từ params hoặc defaultValue
+                        def cicdTaskId = taskId ?: params.TASK_ID
+                        if (cicdTaskId && cicdTaskId.trim()) {
+                            startWebhookData.build.parameters = [TASK_ID: cicdTaskId]
+                            echo "🔧 CI/CD Task ID: ${cicdTaskId}"
                         } else {
                             echo "⚠️ Warning: No TASK_ID for CI/CD task, skipping webhook"
                             return
@@ -155,10 +156,11 @@ pipeline {
                 if (taskId && taskId.trim()) {
                     webhookData.build.parameters = [TASK_ID: taskId]
                 } else if (env.TASK_TYPE == 'cicd') {
-                    // Với CI/CD, lấy TASK_ID từ defaultValue trong Jenkins config
-                    // Nếu không có defaultValue, bỏ qua webhook để tránh lỗi
-                    if (taskId && taskId.trim()) {
-                        webhookData.build.parameters = [TASK_ID: taskId]
+                    // Với CI/CD, lấy TASK_ID từ params hoặc defaultValue
+                    def cicdTaskId = taskId ?: params.TASK_ID
+                    if (cicdTaskId && cicdTaskId.trim()) {
+                        webhookData.build.parameters = [TASK_ID: cicdTaskId]
+                        echo "🔧 CI/CD Task ID: ${cicdTaskId}"
                     } else {
                         echo "⚠️ Warning: No TASK_ID for CI/CD task, skipping webhook"
                         return
