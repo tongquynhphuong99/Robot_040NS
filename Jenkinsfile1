@@ -12,7 +12,6 @@ pipeline {
     
     triggers {
         cron(env.CRON_SCHEDULE ?: '')
-        //pollSCM(env.SCM_POLL ?: '')
     }
     
     stages {
@@ -53,9 +52,18 @@ pipeline {
                         ]
                     ]
                     
-                    // Chỉ thêm TASK_ID vào parameters nếu có giá trị
+                    // Thêm TASK_ID vào parameters
                     if (taskId && taskId.trim()) {
                         startWebhookData.build.parameters = [TASK_ID: taskId]
+                    } else if (env.TASK_TYPE == 'cicd') {
+                        // Với CI/CD, lấy TASK_ID từ defaultValue trong Jenkins config
+                        // Nếu không có defaultValue, bỏ qua webhook để tránh lỗi
+                        if (taskId && taskId.trim()) {
+                            startWebhookData.build.parameters = [TASK_ID: taskId]
+                        } else {
+                            echo "⚠️ Warning: No TASK_ID for CI/CD task, skipping webhook"
+                            return
+                        }
                     }
                     
                     try {
@@ -143,9 +151,18 @@ pipeline {
                     ]
                 ]
                 
-                // Chỉ thêm TASK_ID vào parameters nếu có giá trị
+                // Thêm TASK_ID vào parameters
                 if (taskId && taskId.trim()) {
                     webhookData.build.parameters = [TASK_ID: taskId]
+                } else if (env.TASK_TYPE == 'cicd') {
+                    // Với CI/CD, lấy TASK_ID từ defaultValue trong Jenkins config
+                    // Nếu không có defaultValue, bỏ qua webhook để tránh lỗi
+                    if (taskId && taskId.trim()) {
+                        webhookData.build.parameters = [TASK_ID: taskId]
+                    } else {
+                        echo "⚠️ Warning: No TASK_ID for CI/CD task, skipping webhook"
+                        return
+                    }
                 }
                 
                 try {
@@ -217,4 +234,4 @@ pipeline {
             }
         }
     }
-}
+} 
