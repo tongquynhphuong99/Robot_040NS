@@ -31,6 +31,34 @@ pipeline {
                     }
                     env.TASK_TYPE = taskType
                     echo "Starting ${taskType} for Task ID: ${params.TASK_ID}"
+                    
+                    // Gửi webhook khi job bắt đầu chạy
+                    def startWebhookData = [
+                        name: env.JOB_NAME,
+                        build: [
+                            number: env.BUILD_NUMBER,
+                            result: 'BUILDING',
+                            status: 'BUILDING',
+                            timestamp: currentBuild.startTimeInMillis,
+                            duration: 0,
+                            parameters: [
+                                TASK_ID: params.TASK_ID
+                            ]
+                        ]
+                    ]
+                    
+                    try {
+                        httpRequest(
+                            url: 'http://backend:8000/api/reports/jenkins/webhook',
+                            httpMode: 'POST',
+                            contentType: 'APPLICATION_JSON',
+                            requestBody: groovy.json.JsonOutput.toJson(startWebhookData),
+                            validResponseCodes: '200,201,202'
+                        )
+                        echo "✅ Start webhook sent successfully"
+                    } catch (Exception e) {
+                        echo "❌ Failed to send start webhook: ${e.getMessage()}"
+                    }
                 }
             }
         }
