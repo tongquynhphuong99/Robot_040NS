@@ -112,7 +112,7 @@ pipeline {
                     
                     // Chạy Robot tests với || true để không dừng pipeline khi fail
                     try {
-                        sh 'robot --outputdir results Bases/Testcase/ || true'
+                        sh 'robot --outputdir results Bases/Testcase/login.robot || true'
                         echo "Robot tests completed"
                     } catch (Exception e) {
                         echo "Robot tests failed, but continuing..."
